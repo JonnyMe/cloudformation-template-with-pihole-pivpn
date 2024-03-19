@@ -6,3 +6,9 @@ Parameters:
 Metadata: 
 
 Resources:
+  WireguardElasticIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Tags: 
+        - Key: Name
+          Value: pivpn-pihole
