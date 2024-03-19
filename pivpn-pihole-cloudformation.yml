@@ -6,6 +6,11 @@ Parameters:
     Type: AWS::EC2::VPC::Id
   SubnetId:
     Type: AWS::EC2::Subnet::Id
+  AMIID:
+    Type: String
+    Default: ami-0c1c30571d2dae5c9
+  KMSID:
+    Type: String
   WGPort:
     Type: Number
     Default: 51820
@@ -19,6 +24,11 @@ Metadata:
           - VPCID
           - SubnetId
       - Label: 
+          default: "EC2 Configuration"
+        Parameters:
+          - AMIID 
+          - KMSID
+      - Label: 
           default: "PiVPN Configuration"
         Parameters:
           - WGPort
@@ -27,6 +37,10 @@ Metadata:
         default: VPC
       SubnetId:
         default: Subnet
+      AMIID:
+        default: AMI id for the image you want to use (e.g. Ubuntu ami-0c1c30571d2dae5c9). 
+      KMSID:
+        default: "KMS id used to encrypt filesystem (KMS > AWS managed keys, default aws/ebs Key ID is fine)"
       WGPort:
         default: "Choose Wireguard listen port"
 
@@ -94,3 +108,26 @@ Resources:
     Path: /
     Roles: 
       - !Ref EC2SSMRole
+  WireguardInstance:
+    Type: AWS::EC2::Instance
+    DependsOn: WireguardElasticIPAssociation
+    Properties: 
+      ImageId: !Sub "${AMIID}"
+      InstanceType: t2.micro
+      NetworkInterfaces:
+        - NetworkInterfaceId: !Ref WireguardNetworkInterface
+          DeviceIndex: 0
+      HibernationOptions:
+        Configured: True
+      BlockDeviceMappings: 
+        - DeviceName: "/dev/sda1"
+          Ebs: 
+            Encrypted: True
+            DeleteOnTermination: True
+            KmsKeyId: !Sub "${KMSID}"
+            VolumeType: gp2
+            VolumeSize: 8
+      IamInstanceProfile: !Ref EC2SSMProfile
+      Tags:
+      - Key: Name
+        Value: pivpn-pihole
