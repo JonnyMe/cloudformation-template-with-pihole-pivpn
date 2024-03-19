@@ -14,6 +14,7 @@ In this stack:
 - [yawnbox blog post](https://yawnbox.com/blog/wireguard-dns-ad-blocking/) which inspired me to do this template
 - Pi-hole® [repository](https://github.com/pi-hole/pi-hole)
 - PiVPN [repository](https://github.com/pivpn/pivpn)
+- Medium [post](https://medium.com/@jonathan.albrieux/cloudformation-stack-to-setup-ec2-instance-running-pivpn-pi-hole-8ee1b482b595) about this template, with some human readable description of the infrastructure
 
 ## Thanks to
 [@mrkrash](https://github.com/mrkrash), one day in Genova, unintentionally and without knowing, he reminded me that I never setup a VPN for fun and led me to ask myself "Why?"
