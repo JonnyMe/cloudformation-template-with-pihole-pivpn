@@ -88,3 +88,9 @@ Resources:
       Tags:
       - Key: Name
         Value: pivpn-pihole
+  EC2SSMProfile:
+  Type: "AWS::IAM::InstanceProfile"
+  Properties: 
+    Path: /
+    Roles: 
+      - !Ref EC2SSMRole
