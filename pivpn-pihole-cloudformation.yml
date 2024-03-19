@@ -175,6 +175,11 @@ Resources:
             mkdir -p /usr/local/src/pivpn
             curl -L https://install.pivpn.io | bash /dev/stdin --unattended pivpn.conf
 
+            pivpnNET=$(cat /etc/pivpn/wireguard/setupVars.conf | grep pivpnNET | sed -E 's/(pivpnNET=)(.+)/\2/g')
+            pivpnDNS1=$(echo $pivpnNET | sed -E 's/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)([0-9]{1,3})/\11/g')
+            sed -i -E "s/(pivpnDNS1=).+/\1$pivpnDNS1/g" /etc/pivpn/wireguard/setupVars.conf
+            sed -i -E "s/(pivpnDNS2=).+/\1/g" /etc/pivpn/wireguard/setupVars.conf
+
       Tags:
       - Key: Name
         Value: pivpn-pihole
