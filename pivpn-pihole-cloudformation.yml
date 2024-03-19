@@ -4,6 +4,8 @@ Description: pihole (using Quad9 DNS)/pivpn (Wireguard setup) ready to use stack
 Parameters:
   VPCID:
     Type: AWS::EC2::VPC::Id
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
   WGPort:
     Type: Number
     Default: 51820
@@ -15,6 +17,7 @@ Metadata:
           default: "Network Configuration"
         Parameters: 
           - VPCID
+          - SubnetId
       - Label: 
           default: "PiVPN Configuration"
         Parameters:
@@ -22,6 +25,8 @@ Metadata:
     ParameterLabels:
       VPCID:
         default: VPC
+      SubnetId:
+        default: Subnet
       WGPort:
         default: "Choose Wireguard listen port"
 
@@ -49,3 +54,13 @@ Resources:
         - Key: Name
           Value: pivpn-pihole
       VpcId: !Sub "${VPCID}"
+  WireguardNetworkInterface:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      SourceDestCheck: False
+      GroupSet:
+        - !Ref WireguardSecurityGroup
+      SubnetId: !Sub "${SubnetId}"
+      Tags:
+      - Key: Name
+        Value: pivpn-pihole
