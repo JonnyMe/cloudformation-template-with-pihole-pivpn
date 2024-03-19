@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Description: pihole (using Quad9 DNS)/pivpn (Wireguard setup) ready to use stack
 
 Parameters:
@@ -15,20 +15,20 @@ Parameters:
     Type: Number
     Default: 51820
 
-Metadata: 
-  AWS::CloudFormation::Interface: 
-    ParameterGroups: 
-      - Label: 
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
           default: "Network Configuration"
-        Parameters: 
+        Parameters:
           - VPCID
           - SubnetId
-      - Label: 
+      - Label:
           default: "EC2 Configuration"
         Parameters:
-          - AMIID 
+          - AMIID
           - KMSID
-      - Label: 
+      - Label:
           default: "PiVPN Configuration"
         Parameters:
           - WGPort
@@ -38,7 +38,7 @@ Metadata:
       SubnetId:
         default: Subnet
       AMIID:
-        default: AMI id for the image you want to use (e.g. Ubuntu ami-0c1c30571d2dae5c9). 
+        default: AMI id for the image you want to use (e.g. Ubuntu ami-0c1c30571d2dae5c9).
       KMSID:
         default: "KMS id used to encrypt filesystem (KMS > AWS managed keys, default aws/ebs Key ID is fine)"
       WGPort:
@@ -48,7 +48,7 @@ Resources:
   WireguardElasticIP:
     Type: AWS::EC2::EIP
     Properties:
-      Tags: 
+      Tags:
         - Key: Name
           Value: pivpn-pihole
   WireguardSecurityGroup:
@@ -76,42 +76,42 @@ Resources:
         - !Ref WireguardSecurityGroup
       SubnetId: !Sub "${SubnetId}"
       Tags:
-      - Key: Name
-        Value: pivpn-pihole
+        - Key: Name
+          Value: pivpn-pihole
   WireguardElasticIPAssociation:
     Type: AWS::EC2::EIPAssociation
     Properties:
       AllocationId: !GetAtt WireguardElasticIP.AllocationId
       NetworkInterfaceId: !Ref WireguardNetworkInterface
   EC2SSMRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
               Service:
                 - ec2.amazonaws.com
             Action:
-              - 'sts:AssumeRole'
+              - "sts:AssumeRole"
       Path: /
       RoleName: pivpn-pihole-ec2-ssm-role
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       Tags:
-      - Key: Name
-        Value: pivpn-pihole
+        - Key: Name
+          Value: pivpn-pihole
   EC2SSMProfile:
   Type: "AWS::IAM::InstanceProfile"
-  Properties: 
+  Properties:
     Path: /
-    Roles: 
+    Roles:
       - !Ref EC2SSMRole
   WireguardInstance:
     Type: AWS::EC2::Instance
     DependsOn: WireguardElasticIPAssociation
-    Properties: 
+    Properties:
       ImageId: !Sub "${AMIID}"
       InstanceType: t2.micro
       NetworkInterfaces:
@@ -119,9 +119,9 @@ Resources:
           DeviceIndex: 0
       HibernationOptions:
         Configured: True
-      BlockDeviceMappings: 
+      BlockDeviceMappings:
         - DeviceName: "/dev/sda1"
-          Ebs: 
+          Ebs:
             Encrypted: True
             DeleteOnTermination: True
             KmsKeyId: !Sub "${KMSID}"
@@ -129,57 +129,56 @@ Resources:
             VolumeSize: 8
       IamInstanceProfile: !Ref EC2SSMProfile
       UserData:
-        Fn::Base64:
-          !Sub |
-            #!/bin/bash
-            mkdir -p /etc/pihole
-            touch /etc/pihole/setupVars.conf
-            cat <<EOT >> /etc/pihole/setupVars.conf
-            PIHOLE_INTERFACE=eth0
-            PIHOLE_DNS_1=9.9.9.9
-            PIHOLE_DNS_2=149.112.112.112
-            QUERY_LOGGING=true
-            INSTALL_WEB_SERVER=false
-            INSTALL_WEB_INTERFACE=false
-            LIGHTTPD_ENABLED=false
-            CACHE_SIZE=10000
-            DNS_FQDN_REQUIRED=true
-            DNS_BOGUS_PRIV=true
-            DNSMASQ_LISTENING=local
-            EOT
-            curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
-            
-            touch pivpn.conf
-            cat <<EOT >> pivpn.conf
-            USING_UFW=0
-            pivpnforceipv6route=1
-            IPv4dev=eth0
-            install_user=ubuntu
-            install_home=/home/ubuntu
-            VPN=wireguard
-            pivpnPORT=${WGPort}
-            pivpnHOST=${WireguardElasticIP.PublicIp}
-            INPUT_CHAIN_EDITED=1
-            FORWARD_CHAIN_EDITED=0
-            INPUT_CHAIN_EDITEDv6=
-            FORWARD_CHAIN_EDITEDv6=
-            pivpnPROTO=udp
-            pivpnMTU=1420
-            pivpnDEV=wg0
-            pivpnenableipv6=0
-            ALLOWED_IPS="0.0.0.0/0, ::0/0"
-            UNATTUPG=1
-            INSTALLED_PACKAGES=(dnsutils grepcidr net-tools bsdmainutils iptables-persistent wireguard-tools qrencode)
-            EOT
-            
-            mkdir -p /usr/local/src/pivpn
-            curl -L https://install.pivpn.io | bash /dev/stdin --unattended pivpn.conf
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          mkdir -p /etc/pihole
+          touch /etc/pihole/setupVars.conf
+          cat <<EOT >> /etc/pihole/setupVars.conf
+          PIHOLE_INTERFACE=eth0
+          PIHOLE_DNS_1=9.9.9.9
+          PIHOLE_DNS_2=149.112.112.112
+          QUERY_LOGGING=true
+          INSTALL_WEB_SERVER=false
+          INSTALL_WEB_INTERFACE=false
+          LIGHTTPD_ENABLED=false
+          CACHE_SIZE=10000
+          DNS_FQDN_REQUIRED=true
+          DNS_BOGUS_PRIV=true
+          DNSMASQ_LISTENING=local
+          EOT
+          curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
 
-            pivpnNET=$(cat /etc/pivpn/wireguard/setupVars.conf | grep pivpnNET | sed -E 's/(pivpnNET=)(.+)/\2/g')
-            pivpnDNS1=$(echo $pivpnNET | sed -E 's/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)([0-9]{1,3})/\11/g')
-            sed -i -E "s/(pivpnDNS1=).+/\1$pivpnDNS1/g" /etc/pivpn/wireguard/setupVars.conf
-            sed -i -E "s/(pivpnDNS2=).+/\1/g" /etc/pivpn/wireguard/setupVars.conf
+          touch pivpn.conf
+          cat <<EOT >> pivpn.conf
+          USING_UFW=0
+          pivpnforceipv6route=1
+          IPv4dev=eth0
+          install_user=ubuntu
+          install_home=/home/ubuntu
+          VPN=wireguard
+          pivpnPORT=${WGPort}
+          pivpnHOST=${WireguardElasticIP.PublicIp}
+          INPUT_CHAIN_EDITED=1
+          FORWARD_CHAIN_EDITED=0
+          INPUT_CHAIN_EDITEDv6=
+          FORWARD_CHAIN_EDITEDv6=
+          pivpnPROTO=udp
+          pivpnMTU=1420
+          pivpnDEV=wg0
+          pivpnenableipv6=0
+          ALLOWED_IPS="0.0.0.0/0, ::0/0"
+          UNATTUPG=1
+          INSTALLED_PACKAGES=(dnsutils grepcidr net-tools bsdmainutils iptables-persistent wireguard-tools qrencode)
+          EOT
+
+          mkdir -p /usr/local/src/pivpn
+          curl -L https://install.pivpn.io | bash /dev/stdin --unattended pivpn.conf
+
+          pivpnNET=$(cat /etc/pivpn/wireguard/setupVars.conf | grep pivpnNET | sed -E 's/(pivpnNET=)(.+)/\2/g')
+          pivpnDNS1=$(echo $pivpnNET | sed -E 's/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)([0-9]{1,3})/\11/g')
+          sed -i -E "s/(pivpnDNS1=).+/\1$pivpnDNS1/g" /etc/pivpn/wireguard/setupVars.conf
+          sed -i -E "s/(pivpnDNS2=).+/\1/g" /etc/pivpn/wireguard/setupVars.conf
 
       Tags:
-      - Key: Name
-        Value: pivpn-pihole
+        - Key: Name
+          Value: pivpn-pihole
