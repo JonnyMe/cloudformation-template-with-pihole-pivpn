@@ -1,0 +1,8 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: pihole (using Quad9 DNS)/pivpn (Wireguard setup) ready to use stack
+
+Parameters:
+
+Metadata: 
+
+Resources:
