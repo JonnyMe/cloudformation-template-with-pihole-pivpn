@@ -64,3 +64,8 @@ Resources:
       Tags:
       - Key: Name
         Value: pivpn-pihole
+  WireguardElasticIPAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      AllocationId: !GetAtt WireguardElasticIP.AllocationId
+      NetworkInterfaceId: !Ref WireguardNetworkInterface
