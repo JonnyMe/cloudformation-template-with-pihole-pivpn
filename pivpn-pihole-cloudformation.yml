@@ -148,6 +148,32 @@ Resources:
             DNSMASQ_LISTENING=local
             EOT
             curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
+            
+            touch pivpn.conf
+            cat <<EOT >> pivpn.conf
+            USING_UFW=0
+            pivpnforceipv6route=1
+            IPv4dev=eth0
+            install_user=ubuntu
+            install_home=/home/ubuntu
+            VPN=wireguard
+            pivpnPORT=${WGPort}
+            pivpnHOST=${WireguardElasticIP.PublicIp}
+            INPUT_CHAIN_EDITED=1
+            FORWARD_CHAIN_EDITED=0
+            INPUT_CHAIN_EDITEDv6=
+            FORWARD_CHAIN_EDITEDv6=
+            pivpnPROTO=udp
+            pivpnMTU=1420
+            pivpnDEV=wg0
+            pivpnenableipv6=0
+            ALLOWED_IPS="0.0.0.0/0, ::0/0"
+            UNATTUPG=1
+            INSTALLED_PACKAGES=(dnsutils grepcidr net-tools bsdmainutils iptables-persistent wireguard-tools qrencode)
+            EOT
+            
+            mkdir -p /usr/local/src/pivpn
+            curl -L https://install.pivpn.io | bash /dev/stdin --unattended pivpn.conf
 
       Tags:
       - Key: Name
