@@ -128,6 +128,27 @@ Resources:
             VolumeType: gp2
             VolumeSize: 8
       IamInstanceProfile: !Ref EC2SSMProfile
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #!/bin/bash
+            mkdir -p /etc/pihole
+            touch /etc/pihole/setupVars.conf
+            cat <<EOT >> /etc/pihole/setupVars.conf
+            PIHOLE_INTERFACE=eth0
+            PIHOLE_DNS_1=9.9.9.9
+            PIHOLE_DNS_2=149.112.112.112
+            QUERY_LOGGING=true
+            INSTALL_WEB_SERVER=false
+            INSTALL_WEB_INTERFACE=false
+            LIGHTTPD_ENABLED=false
+            CACHE_SIZE=10000
+            DNS_FQDN_REQUIRED=true
+            DNS_BOGUS_PRIV=true
+            DNSMASQ_LISTENING=local
+            EOT
+            curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
+
       Tags:
       - Key: Name
         Value: pivpn-pihole
