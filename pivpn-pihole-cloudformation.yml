@@ -69,3 +69,22 @@ Resources:
     Properties:
       AllocationId: !GetAtt WireguardElasticIP.AllocationId
       NetworkInterfaceId: !Ref WireguardNetworkInterface
+  EC2SSMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      RoleName: pivpn-pihole-ec2-ssm-role
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Tags:
+      - Key: Name
+        Value: pivpn-pihole
