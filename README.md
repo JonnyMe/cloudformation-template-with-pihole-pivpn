@@ -1,3 +1,6 @@
+> [!WARNING]
+> PiVPN Is no longer maintained. please read more about it [here](https://github.com/pivpn/pivpn/releases/tag/v4.6.0)
+
 # CloudFormation stack to setup EC2 instance running pivpn/pi-hole
 ![setup](pivpn-pihole.jpg)
 
